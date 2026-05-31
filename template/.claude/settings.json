@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(python3:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(pytest:*)",
+      "Bash(chmod:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/session-bootstrap.sh" }] }
+    ],
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/auto-capture.sh" }] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/correction-detector.sh" }] }
+    ]
+  }
+}
