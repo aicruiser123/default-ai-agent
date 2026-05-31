@@ -43,6 +43,26 @@ cd ~/projects/new-thing
 claude          # хуки и скиллы активны с первого старта
 ```
 
+### Обновление уже установленного окружения
+
+Не перезапускай обычную установку с `CC_ENV_FORCE=1` — она затрёт твою память и правки. Используй `--update`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/aicruiser123/default-ai-agent/main/install.sh | bash -s -- --update
+# или конкретную папку:
+curl -fsSL .../install.sh | bash -s -- --update ~/projects/new-thing
+```
+
+Что делает `--update`:
+
+| Категория | Поведение |
+|---|---|
+| Механика: `hooks/`, `.claude/skills/` | перезаписывается из репо (твои добавленные скиллы не трогаются) |
+| Твои файлы: `CLAUDE.md`, `.claude/settings.json`, `core/USER.md`, `core/rules.md` | НЕ перезаписываются; новая версия кладётся рядом как `<файл>.new` для ручного сравнения (`diff`) |
+| Память: `core/hot/`, `core/warm/`, `core/learnings/`, `memory/` | не трогается вообще |
+
+После обновления сравни появившиеся `*.new` с твоими файлами, перенеси нужное и удали `*.new`.
+
 ### Переменные
 
 | Переменная | Назначение |
