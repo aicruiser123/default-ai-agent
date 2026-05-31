@@ -1,8 +1,29 @@
-# claude-env
+# default-ai-agent
 
-Саморазворачивающееся окружение Claude Code: трёхслойная память + петля самообучения через хуки. Одна команда — и любая папка готова к разработке.
+**Окружение для Claude Code, которое разворачивается одной командой и сразу готово к разработке любого проекта.**
+
+Обычная сессия Claude Code забывает всё между запусками: каждый раз приходится заново объяснять контекст, правила и на чём остановились. Этот шаблон даёт агенту **постоянную память** и **петлю самообучения** — и то и другое держится не «на памяти модели», а на детерминированных хуках, которые читают и пишут файлы. Плюс набор из 15 скиллов дисциплины разработки (superpowers).
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/aicruiser123/default-ai-agent/main/install.sh | bash
+```
+
+---
+
+## Что это даёт
+
+| Без шаблона | С шаблоном |
+|---|---|
+| Контекст теряется при рестарте сессии | `handoff.md` + `recent.md` инжектятся на старте — агент помнит, где остановился |
+| Правила приходится повторять каждый раз | `CLAUDE.md` + `core/rules.md` читаются автоматически |
+| Одни и те же ошибки повторяются | Твои поправки превращаются в уроки и инжектятся в каждую сессию |
+| Скиллы надо искать и ставить | 15 dev-скиллов уже на месте, находятся нативно |
+
+---
 
 ## Установка
+
+В текущую папку:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/aicruiser123/default-ai-agent/main/install.sh | bash
@@ -14,44 +35,133 @@ curl -fsSL https://raw.githubusercontent.com/aicruiser123/default-ai-agent/main/
 curl -fsSL https://raw.githubusercontent.com/aicruiser123/default-ai-agent/main/install.sh | bash -s -- ~/projects/new-thing
 ```
 
-Если репозиторий приватный — поставь `gh` (`brew install gh && gh auth login`), скрипт сам переключится на него.
+Затем:
 
-Переменные:
-- `CC_ENV_REPO=owner/repo` — переопределить источник
-- `CC_ENV_BRANCH=main` — ветка
-- `CC_ENV_FORCE=1` — перезаписать существующие файлы
+```bash
+cd ~/projects/new-thing
+# заполни core/USER.md (кто ты) и core/rules.md (стек, команды проекта)
+claude          # хуки и скиллы активны с первого старта
+```
+
+### Переменные
+
+| Переменная | Назначение |
+|---|---|
+| `CC_ENV_REPO=owner/repo` | тянуть из другого репозитория |
+| `CC_ENV_BRANCH=main` | другая ветка |
+| `CC_ENV_FORCE=1` | перезаписать существующие файлы (по умолчанию установка отказывается, если в папке уже есть `CLAUDE.md`) |
+
+### Требования
+
+`curl` и `tar` (есть в любой системе по умолчанию). Скиллы используют `git` и `python3` — стандартны на любой машине разработчика. Если репозиторий приватный — поставь GitHub CLI (`brew install gh && gh auth login`), скрипт сам переключится на него.
+
+### Безопасность установки
+
+`curl … | bash` исполняет скрипт из сети. Это безопасно для **своего** репозитория. Если даёшь команду другим — посоветуй сначала прочитать скрипт:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/aicruiser123/default-ai-agent/main/install.sh -o install.sh
+less install.sh        # прочитать
+bash install.sh        # запустить
+```
+
+Установщик не трогает существующие файлы без `CC_ENV_FORCE=1` и распаковывает архив в изолированную временную папку.
+
+---
 
 ## Что разворачивается
 
 ```
-CLAUDE.md                     правила проекта (слой поверх глобального)
-.claude/settings.json         хуки + permissions
-.claude/skills/               15 dev-дисциплина superpowers (Skill tool находит нативно)
-memory/MEMORY.md              индекс долгой типизированной памяти
-core/
-  USER.md                     кто владелец
-  rules.md                    инварианты проекта
-  hot/handoff.md              «где остановились» (перезаписывается)
-  hot/recent.md               хвост активности (пишет хук)
-  warm/decisions.md           лог решений (ADR-lite)
-  learnings/lessons.md        курированные уроки (инжектятся в сессию)
-  learnings/episodes.jsonl    сырые коррекции (пишет хук)
-hooks/
-  session-bootstrap.sh        SessionStart -> инжектит handoff+recent+lessons
-  auto-capture.sh             Stop -> дописывает recent
-  correction-detector.sh      UserPromptSubmit -> ловит поправки в episodes
+.
+├── CLAUDE.md                      правила проекта (слой поверх глобального CLAUDE.md)
+├── .claude/
+│   ├── settings.json              регистрация хуков + permissions
+│   └── skills/                    15 dev-дисциплина superpowers (Skill tool находит сам)
+├── memory/
+│   └── MEMORY.md                  индекс долгой типизированной памяти
+├── core/
+│   ├── USER.md                    кто владелец и как с ним работать
+│   ├── rules.md                   инварианты проекта (стек, команды, чего не ломать)
+│   ├── hot/
+│   │   ├── handoff.md             «где остановились» — перезаписывается в конце задачи
+│   │   └── recent.md              хвост активности — дописывает хук
+│   ├── warm/
+│   │   └── decisions.md           лог архитектурных решений (ADR-lite)
+│   └── learnings/
+│       ├── lessons.md             курированные уроки — инжектятся в каждую сессию
+│       └── episodes.jsonl         сырые коррекции — пишет хук
+└── hooks/
+    ├── _lib.sh                    общие helper'ы
+    ├── session-bootstrap.sh       SessionStart → инжектит handoff + recent + lessons
+    ├── auto-capture.sh            Stop → дописывает recent (+ ротация)
+    └── correction-detector.sh     UserPromptSubmit → ловит поправки в episodes
 ```
 
-## Как замыкается петля самообучения
+---
 
-Поправка владельца → `correction-detector.sh` пишет в `episodes.jsonl` → я курирую класс ошибки в `lessons.md` → `session-bootstrap.sh` инжектит уроки в каждую новую сессию. Память переживает рестарты, а не держится «на памяти модели».
+## Архитектура памяти
 
-## Скиллы (superpowers, dev-дисциплина)
+Память разбита на слои по «температуре» — от горячего (читается каждую сессию) к холодному (по запросу):
 
-В `.claude/skills/` вшито 15 project-agnostic скиллов: brainstorming, writing/executing-plans, test-driven-development, systematic-debugging, requesting/receiving-code-review, using-git-worktrees, finishing-a-development-branch, subagent-driven-development, dispatching-parallel-agents, verification-before-completion, using-superpowers, skill-creator, find-skills. Claude Code находит их нативно через Skill tool. Источники и лицензии — `.claude/skills/SOURCES.md` (MIT, pinned, без авто-обновления).
+- **hot** (`core/hot/`) — то, что нужно агенту прямо сейчас. `handoff.md` («сделано / осталось / следующий шаг») и хвост `recent.md` инжектятся в контекст автоматически при старте сессии.
+- **warm** (`core/warm/decisions.md`) — журнал решений: контекст → решение → почему. Читается по необходимости, чтобы не повторять уже сделанный выбор.
+- **learnings** (`core/learnings/`) — уроки на будущее. `lessons.md` (по строке на урок) инжектится в каждую сессию.
+- **memory** (`memory/`) — долгие типизированные факты (о владельце, проекте, внешних ресурсах). Каждый факт — отдельный `.md` с frontmatter (`type: user | feedback | project | reference`), индекс в `memory/MEMORY.md`.
 
-Бизнес-специфичные скиллы (Google Workspace, research-instagram/x, deep-research, present→Telegram, youtube, excalidraw) намеренно НЕ вшиты — требуют внешних API-ключей и аккаунтов.
+Когда что писать — прописано в `CLAUDE.md`, агент следует этому сам.
 
-## После установки
-1. Заполни `core/USER.md` и `core/rules.md`.
-2. `claude` — хуки и скиллы активируются со старта сессии.
+> **Принцип:** handoff/recent/lessons — это снэпшоты на момент записи, а не истина. Перед действиями агент перепроверяет актуальное состояние (файлы, git, тесты), чтобы не «вспомнить» уже исправленный баг.
+
+---
+
+## Петля самообучения
+
+```
+   твоя поправка в чате
+          │
+          ▼
+ correction-detector.sh  ──►  core/learnings/episodes.jsonl   (сырьё, автоматически)
+          │
+          ▼
+ агент курирует класс ошибки  ──►  core/learnings/lessons.md   (осознанно, 1 урок = 1 строка)
+          │
+          ▼
+ session-bootstrap.sh инжектит lessons  ──►  в КАЖДУЮ новую сессию
+```
+
+Хук на `UserPromptSubmit` распознаёт маркеры коррекции («нет, не так», «я же говорил», «перестань», «should be», «that's wrong» и т.п.) и пишет их в `episodes.jsonl`. Это сырьё; агент превращает его в обобщённые уроки в `lessons.md`, которые затем подаются в контекст на старте каждой сессии. Так ошибка не повторяется — петля замкнута на файлах, а не на удаче.
+
+Хуки спроектированы безопасно: они **никогда не блокируют** работу (всегда `exit 0`), устойчивы к битому/пустому вводу и пишут память строго в каталог текущего проекта (через `CLAUDE_PROJECT_DIR`), даже если проект вложен в другой git-репозиторий.
+
+---
+
+## Скиллы (superpowers, дисциплина разработки)
+
+В `.claude/skills/` вшито 15 project-agnostic скиллов — Claude Code находит их нативно через Skill tool:
+
+| Категория | Скиллы |
+|---|---|
+| Планирование | `brainstorming`, `writing-plans`, `executing-plans` |
+| Параллельная работа | `subagent-driven-development`, `dispatching-parallel-agents` |
+| Качество | `test-driven-development`, `systematic-debugging`, `verification-before-completion` |
+| Ревью | `requesting-code-review`, `receiving-code-review` |
+| Git / мета | `using-git-worktrees`, `finishing-a-development-branch`, `using-superpowers`, `skill-creator`, `find-skills` |
+
+Источники и лицензии (MIT, зафиксированные версии, без авто-обновления) — в `.claude/skills/SOURCES.md`.
+
+Бизнес-специфичные скиллы (Google Workspace, research-instagram/x, deep-research, present→Telegram, youtube, excalidraw) намеренно **не** вшиты — они требуют внешних API-ключей и аккаунтов и бесполезны в чистом проекте.
+
+---
+
+## Настройка под себя
+
+1. **`core/USER.md`** — имя, обращение, таймзона, стиль работы.
+2. **`core/rules.md`** — стек, команды запуска/тестов/линта, инварианты проекта.
+3. **`CLAUDE.md`** — правила и стиль; добавляй проектное по мере роста.
+4. **`.claude/settings.json`** — `permissions` (что разрешено без подтверждения) и регистрация хуков. Деструктивные команды (`rm -rf`, `git push --force`, `git reset --hard`) в `deny` — но это best-effort, основная защита всё равно в правиле «деструктив только с подтверждением».
+
+---
+
+## Лицензия
+
+Код шаблона — MIT. Вендоренные скиллы сохраняют свои лицензии (см. `.claude/skills/SOURCES.md`).
