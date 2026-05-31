@@ -2,8 +2,8 @@
 # Claude Code env bootstrap — разворачивает память + петлю самообучения в папку.
 #
 # Использование:
-#   curl -fsSL https://raw.githubusercontent.com/USER/REPO/main/install.sh | bash
-#   curl -fsSL https://raw.githubusercontent.com/USER/REPO/main/install.sh | bash -s -- /путь/к/папке
+#   curl -fsSL https://raw.githubusercontent.com/aicruiser123/default-ai-agent/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/aicruiser123/default-ai-agent/main/install.sh | bash -s -- /путь/к/папке
 #
 # Переменные:
 #   CC_ENV_REPO=owner/repo   — откуда тянуть (по умолчанию вшито ниже)
@@ -12,7 +12,7 @@
 
 set -euo pipefail
 
-REPO="${CC_ENV_REPO:-USER/REPO}"      # <-- ЗАМЕНИ на свой owner/repo (или передай CC_ENV_REPO=)
+REPO="${CC_ENV_REPO:-aicruiser123/default-ai-agent}"      # переопределить: CC_ENV_REPO=owner/repo
 BRANCH="${CC_ENV_BRANCH:-main}"
 TARGET="${1:-$PWD}"
 

@@ -5,13 +5,13 @@
 ## Установка
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/USER/REPO/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aicruiser123/default-ai-agent/main/install.sh | bash
 ```
 
 В конкретную папку:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/USER/REPO/main/install.sh | bash -s -- ~/projects/new-thing
+curl -fsSL https://raw.githubusercontent.com/aicruiser123/default-ai-agent/main/install.sh | bash -s -- ~/projects/new-thing
 ```
 
 Если репозиторий приватный — поставь `gh` (`brew install gh && gh auth login`), скрипт сам переключится на него.
@@ -20,8 +20,6 @@ curl -fsSL https://raw.githubusercontent.com/USER/REPO/main/install.sh | bash -s
 - `CC_ENV_REPO=owner/repo` — переопределить источник
 - `CC_ENV_BRANCH=main` — ветка
 - `CC_ENV_FORCE=1` — перезаписать существующие файлы
-
-> Замени `USER/REPO` на свои координаты GitHub в этом README и в `install.sh` (переменная `REPO`).
 
 ## Что разворачивается
 
