@@ -28,6 +28,7 @@ curl -fsSL https://raw.githubusercontent.com/USER/REPO/main/install.sh | bash -s
 ```
 CLAUDE.md                     правила проекта (слой поверх глобального)
 .claude/settings.json         хуки + permissions
+.claude/skills/               15 dev-дисциплина superpowers (Skill tool находит нативно)
 memory/MEMORY.md              индекс долгой типизированной памяти
 core/
   USER.md                     кто владелец
@@ -47,6 +48,12 @@ hooks/
 
 Поправка владельца → `correction-detector.sh` пишет в `episodes.jsonl` → я курирую класс ошибки в `lessons.md` → `session-bootstrap.sh` инжектит уроки в каждую новую сессию. Память переживает рестарты, а не держится «на памяти модели».
 
+## Скиллы (superpowers, dev-дисциплина)
+
+В `.claude/skills/` вшито 15 project-agnostic скиллов: brainstorming, writing/executing-plans, test-driven-development, systematic-debugging, requesting/receiving-code-review, using-git-worktrees, finishing-a-development-branch, subagent-driven-development, dispatching-parallel-agents, verification-before-completion, using-superpowers, skill-creator, find-skills. Claude Code находит их нативно через Skill tool. Источники и лицензии — `.claude/skills/SOURCES.md` (MIT, pinned, без авто-обновления).
+
+Бизнес-специфичные скиллы (Google Workspace, research-instagram/x, deep-research, present→Telegram, youtube, excalidraw) намеренно НЕ вшиты — требуют внешних API-ключей и аккаунтов.
+
 ## После установки
 1. Заполни `core/USER.md` и `core/rules.md`.
-2. `claude` — хуки активируются со старта сессии.
+2. `claude` — хуки и скиллы активируются со старта сессии.

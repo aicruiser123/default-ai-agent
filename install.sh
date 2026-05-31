@@ -68,4 +68,4 @@ echo
 echo "Дальше:"
 echo "  cd \"$TARGET\""
 echo "  заполни core/USER.md (кто ты) и CLAUDE.md (правила проекта)"
-echo "  claude        # хуки активируются со старта сессии"
+echo "  claude        # хуки + 15 dev-скиллов (.claude/skills/) активны со старта"
