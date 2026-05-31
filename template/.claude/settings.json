@@ -24,13 +24,13 @@
   },
   "hooks": {
     "SessionStart": [
-      { "hooks": [{ "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/session-bootstrap.sh" }] }
+      { "hooks": [{ "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/hooks/session-bootstrap.sh" }] }
     ],
     "Stop": [
-      { "hooks": [{ "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/auto-capture.sh" }] }
+      { "hooks": [{ "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/hooks/auto-capture.sh" }] }
     ],
     "UserPromptSubmit": [
-      { "hooks": [{ "type": "command", "command": "$CLAUDE_PROJECT_DIR/hooks/correction-detector.sh" }] }
+      { "hooks": [{ "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/hooks/correction-detector.sh" }] }
     ]
   }
 }

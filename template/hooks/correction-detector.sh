@@ -25,9 +25,10 @@ print(json.dumps({'ts': sys.argv[1], 'prompt_excerpt': sys.argv[2]}, ensure_asci
   else
     # Нет python3: надёжное экранирование JSON в чистом shell — рабиновая нора
     # (BSD vs GNU). episodes.jsonl — lossy-лог для курирования, точность не нужна:
-    # выбрасываем \ и " и схлопываем управляющие символы в пробел. Валидный JSON
-    # гарантирован, смысл поправки сохраняется.
-    ESC="$(printf '%s' "$EXCERPT" | tr -d '\\"' | tr '\n\r\t' '   ')"
+    # выбрасываем \ и ", схлопываем \n\r\t в пробел и удаляем ВСЕ остальные
+    # control-символы (\x00-\x1f) — иначе они оставляют JSON-строку невалидной
+    # по RFC 8259. Валидный JSON гарантирован, смысл поправки сохраняется.
+    ESC="$(printf '%s' "$EXCERPT" | tr -d '\\"' | tr '\n\r\t' '   ' | tr -d '\000-\037')"
     printf '{"ts":"%s","prompt_excerpt":"%s"}\n' "$TS" "$ESC" >> "$EP"
   fi
 fi

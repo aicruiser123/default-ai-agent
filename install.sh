@@ -37,7 +37,7 @@ SRC=""
 URL="${CC_ENV_URL:-https://codeload.github.com/${REPO}/tar.gz/refs/heads/${BRANCH}}"
 say "Качаю ${REPO}@${BRANCH}"
 if curl -fsSL "$URL" | tar -xz -C "$TMP" 2>/dev/null; then
-  SRC="$(echo "$TMP"/*/template)"
+  SRC="$(find "$TMP" -maxdepth 2 -type d -name template -print -quit)"
 elif command -v gh >/dev/null; then
   say "Публичный доступ не сработал — пробую gh (приватный репозиторий)"
   gh repo clone "$REPO" "$TMP/clone" -- --depth 1 --branch "$BRANCH" >/dev/null 2>&1 \

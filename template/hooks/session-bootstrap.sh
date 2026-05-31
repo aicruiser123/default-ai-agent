@@ -25,6 +25,9 @@ LESSONS="${ROOT}/core/learnings/lessons.md"
     echo "## Уроки (не повторять)"; echo
     tail -n 40 "$LESSONS"; echo
   fi
-} | head -c 12000
+# head -c режет по байтам и может разрубить многобайтовую UTF-8 (кириллицу) на
+# границе 12000 — iconv -c отбрасывает получившуюся неполную последовательность,
+# гарантируя валидный UTF-8 на входе Claude Code.
+} | head -c 12000 | iconv -f UTF-8 -t UTF-8 -c
 
 exit 0
