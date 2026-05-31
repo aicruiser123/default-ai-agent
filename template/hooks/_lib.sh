@@ -2,13 +2,18 @@
 # Общие helper'ы для хуков окружения Claude Code.
 set -euo pipefail
 
-# Корень проекта: git toplevel, иначе CLAUDE_PROJECT_DIR, иначе cwd.
+# Корень проекта. Приоритет: CLAUDE_PROJECT_DIR (его выставляет Claude Code для
+# хуков и он авторитетен), иначе git toplevel, иначе cwd. ВАЖНО: git нельзя
+# ставить первым — если проект развёрнут ВНУТРИ родительского git-репо, toplevel
+# укажет на родителя и память проекта уйдёт не туда.
 cc_root() {
   local root
-  if root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
+  if [[ -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    printf '%s\n' "$CLAUDE_PROJECT_DIR"
+  elif root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
     printf '%s\n' "$root"
   else
-    printf '%s\n' "${CLAUDE_PROJECT_DIR:-$PWD}"
+    printf '%s\n' "$PWD"
   fi
 }
 

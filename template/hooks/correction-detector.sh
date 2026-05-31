@@ -23,7 +23,11 @@ import json, sys
 print(json.dumps({'ts': sys.argv[1], 'prompt_excerpt': sys.argv[2]}, ensure_ascii=False))
 " "$TS" "$EXCERPT" >> "$EP"
   else
-    ESC="${EXCERPT//\\/\\\\}"; ESC="${ESC//\"/\\\"}"; ESC="${ESC//$'\n'/ }"
+    # Нет python3: надёжное экранирование JSON в чистом shell — рабиновая нора
+    # (BSD vs GNU). episodes.jsonl — lossy-лог для курирования, точность не нужна:
+    # выбрасываем \ и " и схлопываем управляющие символы в пробел. Валидный JSON
+    # гарантирован, смысл поправки сохраняется.
+    ESC="$(printf '%s' "$EXCERPT" | tr -d '\\"' | tr '\n\r\t' '   ')"
     printf '{"ts":"%s","prompt_excerpt":"%s"}\n' "$TS" "$ESC" >> "$EP"
   fi
 fi
